@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenStep - Login</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            /* Using the exact image you provided as the background */
+            background: url('1000128343.png') no-repeat center center fixed;
+            background-size: cover;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end; /* Push content towards the bottom */
+            align-items: center;
+            padding-bottom: 80px; /* Space from the bottom */
+        }
+
+        /* Loading Overlay to hide page jump during auth check */
+        #loading-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            font-size: 18px;
+            font-weight: 600;
+            color: #16a34a;
+        }
+
+        /* Simple Google Login Button */
+        .google-login-btn {
+            background-color: #ffffff;
+            color: #333333;
+            border: none;
+            border-radius: 30px;
+            padding: 16px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: transform 0.2s, background-color 0.2s;
+            z-index: 10; /* Ensure it's clickable above the background */
+        }
+
+        .google-login-btn:hover {
+            background-color: #f8f9fa;
+        }
+
+        .google-login-btn:active {
+            transform: scale(0.98);
+        }
+
+        .google-login-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+        
+    </style>
+</head>
+<body>
+
+    <!-- Loading overlay while checking Firebase Auth status -->
+    <div id="loading-overlay">Checking authentication...</div>
+
+    <!-- The Single Login Button -->
+    <button class="google-login-btn" id="googleLoginBtn">
+        <svg viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
+            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.19v3.15C3.17 21.32 7.24 24 12 24z"/>
+            <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.19C.43 8.1 0 9.99 0 12s.43 3.9 1.19 5.42l4.09-3.15z"/>
+            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.24 0 3.17 2.68 1.19 6.58l4.09 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+        </svg>
+        Continue with Google
+    </button>
+
+    <!-- Firebase Integration -->
+    <script type="module">
+        // Import from your firebase-config.js file
+        import { auth } from './firebase-config.js';
+        import { GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        // 1. Auto-Login Check
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // If user is already logged in, redirect immediately
+                window.location.replace('index.html');
+            } else {
+                // If not logged in, hide the loading screen and show the button
+                document.getElementById('loading-overlay').style.display = 'none';
+            }
+        });
+
+        // 2. Google Login Action
+        const googleLoginBtn = document.getElementById('googleLoginBtn');
+        const provider = new GoogleAuthProvider();
+
+        googleLoginBtn.addEventListener('click', async () => {
+            try {
+                // Trigger the popup
+                await signInWithPopup(auth, provider);
+                // No explicit redirect needed here because onAuthStateChanged 
+                // will catch the successful login and redirect to index.html
+            } catch (error) {
+                console.error("Login failed:", error.message);
+                alert("Login Failed: " + error.message);
+            }
+        });
+    </script>
+</body>
+</html>
